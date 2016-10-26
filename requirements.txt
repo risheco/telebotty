@@ -1,0 +1,6 @@
+certifi==2016.9.26
+future==0.15.2
+pkg-resources==0.0.0
+pony==0.7
+python-telegram-bot==5.2.0
+urllib3==1.18
