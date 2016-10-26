@@ -7,6 +7,7 @@ import re
 import sys
 from os.path import join
 
+from pony.orm import Database
 from telegram.ext import Updater, InlineQueryHandler, CallbackQueryHandler, MessageHandler, ChosenInlineResultHandler
 
 
@@ -32,6 +33,10 @@ class Application(object):
 
         self.inline_query = []
         self.inject_dependencies()
+
+        self.db = Database()
+        self.db.bind('sqlite', 'db.sqlite', create_db=True)
+
 
         #
         def callback_query_handler(bot, update):
@@ -72,7 +77,7 @@ class Application(object):
         self.inline_query.append((prog, func))
 
     def inject_controllers(self):
-        from telebot.controller import Controller
+        from telebotty.controller import Controller
 
         for cl in get_classes('controllers'):
             if cl is not Controller and issubclass(cl, Controller):
@@ -80,9 +85,8 @@ class Application(object):
                 cl(self)
 
     def inject_models(self):
-        from extentions import db
         for cl in get_classes('models'):
-            if cl is not db.Entity and issubclass(cl, db.Entity):
+            if cl is not self.db.Entity and issubclass(cl, self.db.Entity):
                 logging.log(logging.INFO, 'Entity class is loaded %s' % cl)
 
-        db.generate_mapping(create_tables=True)
+        self.db.generate_mapping(create_tables=True)
