@@ -8,7 +8,7 @@ import sys
 from os.path import join
 
 from pony.orm import Database
-from telegram.ext import Updater, InlineQueryHandler, CallbackQueryHandler, MessageHandler, ChosenInlineResultHandler
+from telegram.ext import Updater, InlineQueryHandler, CallbackQueryHandler, ChosenInlineResultHandler
 
 
 def get_classes(package):
@@ -23,6 +23,15 @@ def get_classes(package):
 
 
 class Application(object):
+    instance = None
+
+    @staticmethod
+    def create(token):
+        if Application.instance is None:
+            Application.instance = Application(token)
+            Application.instance.setup_db()
+        return Application.instance
+
     def __init__(self, token):
         logging.basicConfig(
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -32,11 +41,6 @@ class Application(object):
         self.updater.dispatcher.add_handler(InlineQueryHandler(self.inline_query_dispatcher))
 
         self.inline_query = []
-        self.inject_dependencies()
-
-        self.db = Database()
-        self.db.bind('sqlite', 'db.sqlite', create_db=True)
-
 
         #
         def callback_query_handler(bot, update):
@@ -52,12 +56,14 @@ class Application(object):
             print("\t" + str(update))
 
         self.updater.dispatcher.add_handler(CallbackQueryHandler(callback_query_handler))
-        self.updater.dispatcher.add_handler(MessageHandler([], message_handler))
+        # self.updater.dispatcher.add_handler(MessageHandler([], message_handler)) TODO except commands
         self.updater.dispatcher.add_handler(ChosenInlineResultHandler(chosen_inline_result_handler))
 
-    def inject_dependencies(self):
-        self.inject_controllers()
+    def setup_db(self):
+        self.db = Database()
+        self.db.bind('sqlite', 'db.sqlite', create_db=True)
         self.inject_models()
+        self.inject_controllers()
 
     def run(self):
         self.updater.start_polling()
@@ -77,7 +83,7 @@ class Application(object):
         self.inline_query.append((prog, func))
 
     def inject_controllers(self):
-        from telebotty.controller import Controller
+        from telebotty.telebotty.controller import Controller
 
         for cl in get_classes('controllers'):
             if cl is not Controller and issubclass(cl, Controller):
