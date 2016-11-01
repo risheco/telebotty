@@ -8,11 +8,11 @@ class Controller(object):
             function = getattr(self, attr_name)
             if hasattr(function, 'is_command'):
                 command_query = getattr(function, 'query')
-                self.app.updater.dispatcher.add_handler(CommandHandler(command_query, function))
+                self.app.handler.dispatcher.add_handler(CommandHandler(command_query, function))
 
             elif hasattr(function, 'is_inline'):
                 regex_query = getattr(function, 'query')
-                self.app.add_inline_handler(regex_query, function)
+                self.app.handler.add_inline_handler(regex_query, function)
 
 
 def command(query):
