@@ -7,10 +7,11 @@ from telegram.ext import Updater, InlineQueryHandler, CallbackQueryHandler, Chos
 class Handler(Updater):
     def __init__(self, token):
         super().__init__(token)
-        
+
         self.dispatcher.add_handler(InlineQueryHandler(self.inline_query_dispatcher))
 
         self.inline_query = []
+        self.text_message = []
 
         #
         def callback_query_handler(bot, update):
@@ -26,7 +27,6 @@ class Handler(Updater):
             print("\t" + str(update))
 
         self.dispatcher.add_handler(CallbackQueryHandler(callback_query_handler))
-        # self.dispatcher.add_handler(MessageHandler([], message_handler)) TODO except commands
         self.dispatcher.add_handler(ChosenInlineResultHandler(chosen_inline_result_handler))
 
     def inline_query_dispatcher(self, bot, update):

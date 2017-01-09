@@ -32,6 +32,7 @@ class Application(object):
         return Application.instance
 
     def __init__(self, token):
+        self.db = Database()
         logging.basicConfig(
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             level=logging.INFO)
@@ -39,7 +40,6 @@ class Application(object):
         self.handler = Handler(token)
 
     def setup_db(self):
-        self.db = Database()
         self.db.bind('sqlite', 'db.sqlite', create_db=True)
         self.inject_models()
         self.inject_controllers()

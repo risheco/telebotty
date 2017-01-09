@@ -1,4 +1,4 @@
-from telegram.ext import CommandHandler
+from telegram.ext import CommandHandler, MessageHandler, Filters
 
 
 class Controller(object):
@@ -14,11 +14,41 @@ class Controller(object):
                 regex_query = getattr(function, 'query')
                 self.app.handler.add_inline_handler(regex_query, function)
 
+            elif hasattr(function, 'is_message'):
+                filters = [Filters.text]
+                if hasattr(function, 'filters'):
+                    filters += function.filters
+                print('Message handler:', function, filters)
+
+                def all_filters(msg):
+                    return all([filter_func(msg) for filter_func in filters])
+
+                self.app.handler.dispatcher.add_handler(
+                    MessageHandler([all_filters], function))
+
 
 def command(query):
     def decorator(func):
         func.is_command = True
         func.query = query
+        return func
+
+    return decorator
+
+
+def message():
+    def decorator(func):
+        func.is_message = True
+        return func
+
+    return decorator
+
+
+def filter_message(filter_func):
+    def decorator(func):
+        if not hasattr(func, 'filters'):
+            func.filters = []
+        func.filters.append(filter_func)
         return func
 
     return decorator
