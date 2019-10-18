@@ -14,6 +14,6 @@ setup(
     install_requires=[
         'pony==0.7',
         'python-telegram-bot==5.2.0',
-        'urllib3==1.18',
+        'urllib3==1.24.2',
     ]
 )
